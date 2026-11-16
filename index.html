@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10131c">
+<title>PDF Reader</title>
+
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #10131c;
+  --panel: #1b2231;
+  --panel2: #242d40;
+  --line: #354057;
+  --text: #f4f6fb;
+  --muted: #a5afc1;
+  --accent: #8879ff;
+  --red: #ff8294;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at 15% 0,#39316c55,transparent 38%),var(--bg);
+  color: var(--text);
+  font-family: system-ui,-apple-system,Segoe UI,sans-serif;
+}
+
+button,input,textarea,select { font: inherit; }
+button { cursor: pointer; }
+
+.top {
+  height: 70px;
+  border-bottom: 1px solid #ffffff15;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 max(18px,calc((100% - 1120px)/2));
+  position: sticky;
+  top: 0;
+  background: #10131cee;
+  backdrop-filter: blur(16px);
+  z-index: 5;
+}
+
+.brand {
+  font-size: 21px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: linear-gradient(135deg,#a79cff,#6252df);
+  display: grid;
+  place-items: center;
+}
+
+main {
+  max-width: 1120px;
+  margin: auto;
+  padding: 42px 20px 70px;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+}
+
+.eyebrow {
+  color: #a89cff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  font-size: clamp(30px,5vw,46px);
+  line-height: 1.08;
+  letter-spacing: -1.8px;
+  margin: 10px 0;
+}
+
+.hero p,.muted { color: var(--muted); }
+.count { font-size: 13px; color: var(--muted); }
+
+.btn {
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg,#9588ff,#6756e8);
+  border: 0;
+}
+
+.btn:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin: 25px 0;
+  flex-wrap: wrap;
+}
+
+.field,textarea,select {
+  background: #151b28;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 11px;
+  outline: none;
+}
+
+.field:focus,textarea:focus,select:focus {
+  border-color: var(--accent);
+}
+
+.search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(230px,1fr));
+  gap: 15px;
+}
+
+.card {
+  background: linear-gradient(150deg,#20283a,#171d2a);
+  border: 1px solid #ffffff14;
+  border-radius: 15px;
+  padding: 17px;
+  display: flex;
+  flex-direction: column;
+  min-height: 195px;
+}
+
+.fileicon {
+  width: 42px;
+  height: 46px;
+  background: #8879ff22;
+  color: #b5adff;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  margin-bottom: 13px;
+}
+
+.tag {
+  font-size: 11px;
+  color: #c1baff;
+  background: #8879ff20;
+  border: 1px solid #8879ff44;
+  border-radius: 30px;
+  padding: 4px 9px;
+  align-self: start;
+}
+
+.card h3 {
+  font-size: 16px;
+  margin: 10px 0 6px;
+  overflow-wrap: anywhere;
+}
+
+.desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0 0 15px;
+}
+
+.cardfoot {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.date {
+  font-size: 11px;
+  color: #8995aa;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.small {
+  font-size: 12px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #293349;
+  color: white;
+  text-decoration: none;
+}
+
+.small.delete { color: var(--red); }
+
+.empty {
+  grid-column: 1/-1;
+  text-align: center;
+  border: 1px dashed #46516a;
+  border-radius: 15px;
+  padding: 55px 15px;
+  color: var(--muted);
+}
+
+.empty strong {
+  display: block;
+  color: white;
+  font-size: 18px;
+  margin-bottom: 7px;
+}
+
+.admin {
+  display: none;
+  background: #1b2231;
+  border: 1px solid #8173ff88;
+  border-radius: 14px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.admin.show { display: block; }
+
+.adminrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin h3 { margin: 0 0 4px; font-size: 16px; }
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #05070dcc;
+  z-index: 20;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+
+.overlay.open { display: flex; }
+
+.modal {
+  width: min(100%,490px);
+  max-height: 92vh;
+  overflow: auto;
+  background: #1b2231;
+  border: 1px solid #ffffff22;
+  border-radius: 17px;
+  padding: 21px;
+}
+
+.modal.wide {
+  width: min(100%,1000px);
+  height: 93vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 17px;
+}
+
+.modalhead h2 { font-size: 20px; margin: 0; }
+
+.close {
+  border: 0;
+  background: #303b51;
+  color: white;
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  font-size: 20px;
+}
+
+.group { margin: 13px 0; }
+
+.group label {
+  display: block;
+  color: #c0c8d6;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.group input,.group textarea { width: 100%; }
+.group textarea { min-height: 75px; }
+
+.hint { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+.readerbar {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.readerstage {
+  flex: 1;
+  overflow: auto;
+  background: #10151f;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12px;
+}
+
+.readerstage canvas {
+  max-width: 100%;
+  height: auto;
+  background: white;
+}
+
+.toast {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translate(-50%,20px);
+  opacity: 0;
+  transition: .2s;
+  background: #293349;
+  border: 1px solid #56627a;
+  border-radius: 10px;
+  padding: 11px 15px;
+  z-index: 50;
+  max-width: 90%;
+  font-size: 13px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%,0);
+}
+
+footer {
+  text-align: center;
+  color: #718099;
+  font-size: 11px;
+  margin-top: 48px;
+}
+
+@media(max-width:600px) {
+  .top { padding: 0 14px; height: 62px; }
+  .brand { font-size: 18px; }
+  main { padding: 30px 14px; }
+  .hero { display: block; }
+  .count { margin-top: 12px; }
+  .grid { grid-template-columns: 1fr; }
+  .modal { padding: 16px; }
+  .modal.wide { padding: 12px; }
+  .toolbar select { flex: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="logo">▤</span>
+    PDF Reader
+  </div>
+  <button class="btn" id="adminAccess">Administration</button>
+</header>
+
+<main>
+
+<section class="hero">
+  <div>
+    <div class="eyebrow">Bibliothèque numérique</div>
+    <h1>Vos documents,<br>au même endroit.</h1>
+    <p class="muted">Explorez, lisez et téléchargez les documents PDF.</p>
+  </div>
+  <div class="count" id="count">Chargement…</div>
+</section>
+
+<section class="admin" id="adminPanel">
+  <div class="adminrow">
+    <div>
+      <h3>Espace administrateur</h3>
+      <div class="hint" id="adminMode"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn primary" id="addOpen">＋ Ajouter un PDF</button>
+      <button class="btn" id="logout">Déconnexion</button>
+    </div>
+  </div>
+</section>
+
+<div class="toolbar">
+  <input class="field search" id="search" placeholder="Rechercher un document…" type="search">
+  <select id="category">
+    <option value="">Toutes les catégories</option>
+  </select>
+  <select id="sort">
+    <option value="new">Plus récents</option>
+    <option value="old">Plus anciens</option>
+    <option value="az">Nom A à Z</option>
+  </select>
+</div>
+
+<section class="grid" id="docs">
+  <div class="empty">Chargement de la bibliothèque…</div>
+</section>
+
+<footer>PDF Reader · Bibliothèque de documents</footer>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- CONNEXION -->
+<div class="overlay" id="loginModal">
+  <div class="modal">
+    <div class="modalhead">
+      <h2>Connexion administrateur</h2>
+      <button class="close" data-close="loginModal">×</button>
+    </div>
+
+    <form id="loginForm">
+      <div class="group">
+        <label for="email">Adresse e-mail</label>
+        <input class="field" id="email" type="email" autocomplete="username" required>
+      </div>
+
+      <div class="group">
+        <label for="password">Mot de passe</label>
+        <input class="field" id="password" type="password" autocomplete="current-password" required>
+      </div>
+
+      <button class="btn primary" id="loginBtn" style="width:100%">
+        Se connecter
+      </button>
+
+      <p class="hint">
+        La connexion nécessite le rôle admin dans les métadonnées Supabase du compte.
+      </p>
+    </form>
+  </div>
+</div>
+
+<!-- AJOUT PDF -->
+<div class="overlay" id="uploadModal">
+  <div class="modal">
+    <div class="modalhead">
+      <h2>Ajouter un document</h2>
+      <button class="close" data-close="uploadModal">×</button>
+    </div>
+
+    <form id="uploadForm">
+      <div class="group">
+        <label for="title">Titre</label>
+        <input class="field" id="title" maxlength="120" required>
+      </div>
+
+      <div class="group">
+        <label for="description">Description</label>
+        <textarea class="field" id="description"></textarea>
+      </div>
+
+      <div class="group">
+        <label for="cat">Catégorie</label>
+        <input class="field" id="cat" value="Général" maxlength="50" required>
+      </div>
+
+      <div class="group">
+        <label for="file">Fichier PDF</label>
+        <input class="field" id="file" type="file" accept=".pdf,application/pdf" required>
+      </div>
+
+      <button class="btn primary" id="uploadBtn" style="width:100%">
+        Envoyer le PDF
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- LECTEUR PDF -->
+<div class="overlay" id="readerModal">
+  <div class="modal wide">
+    <div class="modalhead">
+      <h2 id="readerTitle">Lecture du PDF</h2>
+      <button class="close" data-close="readerModal">×</button>
+    </div>
+
+    <div class="readerbar">
+      <button class="small" id="prev">←</button>
+      <span class="hint" id="pageInfo">Page —</span>
+      <button class="small" id="next">→</button>
+      <button class="small" id="minus">−</button>
+      <span class="hint" id="zoomInfo">100%</span>
+      <button class="small" id="plus">＋</button>
+      <a class="small" id="openPdf" target="_blank" rel="noopener">
+        Ouvrir le PDF ↗
+      </a>
+    </div>
+
+    <div class="readerstage" id="readerStage">
+      <span class="hint">Chargement…</span>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+
+import { createClient } from
+'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+import * as pdfjs from
+'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs';
+
+/* CONFIGURATION SUPABASE */
+
+const SUPABASE_URL =
+'https://lrmbgdcmuyyzyzqwtroq.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_jABnBkOFafn1o_gxCLF-tg_xoAe0b4b';
+
+const BUCKET = 'pdfs';
+
+const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
+);
+
+pdfjs.GlobalWorkerOptions.workerSrc =
+'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
+
+/* VARIABLES */
+
+const $ = id => document.getElementById(id);
+
+let docs = [];
+let user = null;
+let adminAllowed = false;
+let pdf = null;
+let pageNo = 1;
+let scale = 1;
+let rendering = null;
+let toastTimer;
+
+/* NOTIFICATIONS */
+
+function message(text) {
+  $('toast').textContent = text;
+  $('toast').classList.add('show');
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    $('toast').classList.remove('show');
+  }, 3500);
+}
+
+function open(id) {
+  $(id).classList.add('open');
+}
+
+function close(id) {
+  $(id).classList.remove('open');
+}
+
+/* PROTECTION */
+
+function esc(s = '') {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c]));
+}
+
+function isPasswordAdmin() {
+  return user?.app_metadata?.role === 'admin';
+}
+
+function fileUrl(path) {
+  return supabase.storage
+    .from(BUCKET)
+    .getPublicUrl(path).data.publicUrl;
+}
+
+/*
+  Le serveur Supabase vérifie l'IP.
+  Le navigateur ne décide pas lui-même si une IP est autorisée.
+*/
+
+async function refreshAdmin() {
+
+  const { data, error } = await supabase.rpc('is_admin_access');
+
+  adminAllowed = !error && data === true;
+
+  $('adminPanel').classList.toggle(
+    'show',
+    adminAllowed
+  );
+
+  $('adminMode').textContent =
+    isPasswordAdmin()
+      ? 'Accès par compte administrateur'
+      : adminAllowed
+        ? 'Accès par adresse IP autorisée'
+        : '';
+
+  $('adminAccess').textContent =
+    adminAllowed
+      ? 'Administration ✓'
+      : 'Administration';
+
+  render();
+}
+
+/* DOCUMENTS */
+
+function dateText(s) {
+  const d = new Date(s);
+
+  return isNaN(d)
+    ? ''
+    : d.toLocaleDateString('fr-FR', {
+        day:'2-digit',
+        month:'short',
+        year:'numeric'
+      });
+}
+
+function categories() {
+
+  const chosen = $('category').value;
+
+  const list = [
+    ...new Set(
+      docs.map(d => (d.category || 'Général').trim())
+        .filter(Boolean)
+    )
+  ].sort((a,b) => a.localeCompare(b,'fr'));
+
+  $('category').innerHTML =
+    '<option value="">Toutes les catégories</option>' +
+    list.map(x =>
+      `<option value="${esc(x)}">${esc(x)}</option>`
+    ).join('');
+
+  if (list.includes(chosen)) {
+    $('category').value = chosen;
+  }
+}
+
+function render() {
+
+  const q = $('search').value.trim().toLocaleLowerCase('fr');
+  const c = $('category').value;
+  const s = $('sort').value;
+
+  let list = docs.filter(d => {
+
+    const text =
+      `${d.title || ''} ${d.description || ''} ${d.category || ''}`
+        .toLocaleLowerCase('fr');
+
+    return text.includes(q) &&
+      (!c || (d.category || 'Général') === c);
+  });
+
+  list.sort((a,b) => {
+
+    if (s === 'az') {
+      return (a.title || '').localeCompare(b.title || '', 'fr');
+    }
+
+    if (s === 'old') {
+      return new Date(a.created_at) - new Date(b.created_at);
+    }
+
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  $('count').textContent =
+    `${docs.length} document${docs.length > 1 ? 's' : ''}`;
+
+  if (!list.length) {
+
+    $('docs').innerHTML = `
+      <div class="empty">
+        <strong>${docs.length ? 'Aucun résultat' : 'La bibliothèque est vide'}</strong>
+        ${docs.length
+          ? 'Essayez une autre recherche.'
+          : 'Les PDF ajoutés apparaîtront ici.'}
+      </div>
+    `;
+
+    return;
+  }
+
+  $('docs').innerHTML = list.map(d => `
+
+    <article class="card">
+
+      <div class="fileicon">▤</div>
+
+      <span class="tag">
+        ${esc(d.category || 'Général')}
+      </span>
+
+      <h3>${esc(d.title || 'Document sans titre')}</h3>
+
+      <p class="desc">
+        ${esc(d.description || 'Aucune description.')}
+      </p>
+
+      <div class="cardfoot">
+
+        <span class="date">
+          ${dateText(d.created_at)}
+        </span>
+
+        <div class="actions">
+
+          <button class="small" data-read="${esc(d.id)}">
+            Lire
+          </button>
+
+          <a class="small"
+             href="${esc(fileUrl(d.file_path))}"
+             target="_blank"
+             rel="noopener">
+            PDF ↗
+          </a>
+
+          ${adminAllowed ? `
+            <button class="small delete" data-del="${esc(d.id)}">
+              Supprimer
+            </button>
+          ` : ''}
+
+        </div>
+      </div>
+    </article>
+
+  `).join('');
+
+  document.querySelectorAll('[data-read]').forEach(b => {
+    b.onclick = () => readPdf(b.dataset.read);
+  });
+
+  document.querySelectorAll('[data-del]').forEach(b => {
+    b.onclick = () => deletePdf(b.dataset.del);
+  });
+}
+
+async function loadDocs() {
+
+  $('docs').innerHTML =
+    '<div class="empty">Chargement…</div>';
+
+  const { data, error } = await supabase
+    .from('documents')
+    .select('*')
+    .order('created_at', { ascending:false });
+
+  if (error) {
+
+    $('docs').innerHTML = `
+      <div class="empty">
+        <strong>Chargement impossible</strong>
+        ${esc(error.message)}
+      </div>
+    `;
+
+    message('Erreur Supabase : ' + error.message);
+    return;
+  }
+
+  docs = data || [];
+
+  categories();
+  render();
+}
+
+/* CONNEXION PAR MOT DE PASSE */
+
+$('adminAccess').onclick = () => {
+
+  if (adminAllowed) {
+    $('adminPanel').scrollIntoView({
+      behavior:'smooth'
+    });
+  } else {
+    open('loginModal');
+  }
+};
+
+$('loginForm').onsubmit = async e => {
+
+  e.preventDefault();
+
+  const b = $('loginBtn');
+
+  b.disabled = true;
+  b.textContent = 'Connexion…';
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+
+    email: $('email').value.trim(),
+    password: $('password').value
+
+  });
+
+  b.disabled = false;
+  b.textContent = 'Se connecter';
+
+  if (error) {
+    message('Connexion refusée : ' + error.message);
+    return;
+  }
+
+  user = data.user;
+
+  await refreshAdmin();
+
+  close('loginModal');
+  $('loginForm').reset();
+
+  if (!adminAllowed) {
+
+    await supabase.auth.signOut();
+
+    user = null;
+
+    await refreshAdmin();
+
+    message('Ce compte ne possède pas le rôle administrateur.');
+
+    return;
+  }
+
+  message('Connexion réussie.');
+};
+
+/* DECONNEXION */
+
+$('logout').onclick = async () => {
+
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    message(error.message);
+    return;
+  }
+
+  user = null;
+
+  await refreshAdmin();
+
+  message('Déconnexion effectuée.');
+};
+
+/* AJOUT DE PDF */
+
+$('addOpen').onclick = () => open('uploadModal');
+
+$('uploadForm').onsubmit = async e => {
+
+  e.preventDefault();
+
+  if (!adminAllowed) {
+    message('Accès administrateur requis.');
+    return;
+  }
+
+  const f = $('file').files[0];
+
+  if (!f) return;
+
+  if (
+    f.type !== 'application/pdf' &&
+    !f.name.toLowerCase().endsWith('.pdf')
+  ) {
+    message('Sélectionnez un fichier PDF.');
+    return;
+  }
+
+  const b = $('uploadBtn');
+
+  b.disabled = true;
+  b.textContent = 'Envoi…';
+
+  const path =
+    crypto.randomUUID() + '-' +
+    f.name.normalize('NFKD')
+      .replace(/[^\w.-]+/g,'_')
+      .slice(-100);
+
+  try {
+
+    const upload = await supabase
+      .storage
+      .from(BUCKET)
+      .upload(path, f, {
+        contentType:'application/pdf',
+        cacheControl:'3600',
+        upsert:false
+      });
+
+    if (upload.error) throw upload.error;
+
+    const result = await supabase
+      .from('documents')
+      .insert({
+
+        title: $('title').value.trim(),
+        description: $('description').value.trim(),
+        category: $('cat').value.trim() || 'Général',
+        file_path: path
+
+      });
+
+    if (result.error) {
+
+      await supabase.storage
+        .from(BUCKET)
+        .remove([path]);
+
+      throw result.error;
+    }
+
+    close('uploadModal');
+
+    $('uploadForm').reset();
+    $('cat').value = 'Général';
+
+    await loadDocs();
+
+    message('PDF ajouté.');
+
+  } catch(err) {
+
+    message('Envoi impossible : ' + err.message);
+
+  } finally {
+
+    b.disabled = false;
+    b.textContent = 'Envoyer le PDF';
+
+  }
+};
+
+/* SUPPRESSION */
+
+async function deletePdf(id) {
+
+  if (!adminAllowed) return;
+
+  const d = docs.find(x => x.id === id);
+
+  if (!d || !confirm(`Supprimer « ${d.title} » ?`)) {
+    return;
+  }
+
+  try {
+
+    const a = await supabase
+      .storage
+      .from(BUCKET)
+      .remove([d.file_path]);
+
+    if (a.error) throw a.error;
+
+    const b = await supabase
+      .from('documents')
+      .delete()
+      .eq('id', id);
+
+    if (b.error) throw b.error;
+
+    await loadDocs();
+
+    message('Document supprimé.');
+
+  } catch(err) {
+
+    message('Suppression impossible : ' + err.message);
+
+  }
+}
+
+/* LECTEUR PDF */
+
+async function readPdf(id) {
+
+  const d = docs.find(x => x.id === id);
+
+  if (!d) return;
+
+  open('readerModal');
+
+  $('readerTitle').textContent = d.title;
+  $('readerStage').textContent = 'Chargement du PDF…';
+  $('openPdf').href = fileUrl(d.file_path);
+
+  pdf = null;
+  pageNo = 1;
+  scale = 1;
+
+  try {
+
+    pdf = await pdfjs
+      .getDocument({ url:fileUrl(d.file_path) })
+      .promise;
+
+    await drawPage();
+
+  } catch(err) {
+
+    $('readerStage').textContent =
+      'Le lecteur intégré n’a pas pu ouvrir ce document. Utilisez « Ouvrir le PDF ». ' +
+      err.message;
+
+  }
+}
+
+async function drawPage() {
+
+  if (!pdf) return;
+
+  if (rendering) {
+    try {
+      rendering.cancel();
+    } catch {}
+    rendering = null;
+  }
+
+  const p = await pdf.getPage(pageNo);
+  const stage = $('readerStage');
+
+  const base = p.getViewport({ scale:1 });
+
+  const fit = Math.min(
+    1.5,
+    Math.max(.5,(stage.clientWidth - 30) / base.width)
+  );
+
+  const v = p.getViewport({ scale:fit * scale });
+  const ratio = window.devicePixelRatio || 1;
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  canvas.width = Math.floor(v.width * ratio);
+  canvas.height = Math.floor(v.height * ratio);
+
+  canvas.style.width = v.width + 'px';
+  canvas.style.height = v.height + 'px';
+
+  stage.replaceChildren(canvas);
+
+  rendering = p.render({
+
+    canvasContext:ctx,
+    viewport:v,
+    transform:ratio === 1
+      ? null
+      : [ratio,0,0,ratio,0,0]
+
+  });
+
+  try {
+
+    await rendering.promise;
+
+  } catch(e) {
+
+    if (e.name !== 'RenderingCancelledException') {
+      throw e;
+    }
+
+  }
+
+  $('pageInfo').textContent =
+    `Page ${pageNo} / ${pdf.numPages}`;
+
+  $('zoomInfo').textContent =
+    Math.round(scale * 100) + '%';
+
+  $('prev').disabled = pageNo <= 1;
+  $('next').disabled = pageNo >= pdf.numPages;
+}
+
+$('prev').onclick = () => {
+
+  if (pdf && pageNo > 1) {
+    pageNo--;
+    drawPage().catch(console.error);
+  }
+
+};
+
+$('next').onclick = () => {
+
+  if (pdf && pageNo < pdf.numPages) {
+    pageNo++;
+    drawPage().catch(console.error);
+  }
+
+};
+
+$('minus').onclick = () => {
+
+  if (pdf) {
+    scale = Math.max(.55,scale - .15);
+    drawPage().catch(console.error);
+  }
+
+};
+
+$('plus').onclick = () => {
+
+  if (pdf) {
+    scale = Math.min(2.5,scale + .15);
+    drawPage().catch(console.error);
+  }
+
+};
+
+/* RECHERCHE ET FILTRES */
+
+$('search').oninput = render;
+$('category').onchange = render;
+$('sort').onchange = render;
+
+/* FERMETURE DES FENÊTRES */
+
+document.querySelectorAll('[data-close]').forEach(b => {
+
+  b.onclick = () => close(b.dataset.close);
+
+});
+
+document.querySelectorAll('.overlay').forEach(o => {
+
+  o.addEventListener('click', e => {
+
+    if (e.target === o) close(o.id);
+
+  });
+
+});
+
+document.addEventListener('keydown', e => {
+
+  if (e.key === 'Escape') {
+
+    document.querySelectorAll('.overlay.open')
+      .forEach(o => close(o.id));
+
+  }
+
+});
+
+window.addEventListener('resize', () => {
+
+  if (
+    $('readerModal').classList.contains('open') &&
+    pdf
+  ) {
+    drawPage().catch(console.error);
+  }
+
+});
+
+/* INITIALISATION */
+
+supabase.auth.onAuthStateChange((_event,session) => {
+
+  user = session?.user || null;
+
+  setTimeout(refreshAdmin,0);
+
+});
+
+const { data:{ session } } =
+  await supabase.auth.getSession();
+
+user = session?.user || null;
+
+await refreshAdmin();
+await loadDocs();
+
+</script>
+</body>
+</html>
